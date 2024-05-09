@@ -39,6 +39,7 @@ int main()
     BookDate* book;
     book = read_file();//初始化链表
 
-    Mainmenu(book);                               //进入主菜单
+    Mainmenu(book);                //进入主菜单
+	delete book;				   //释放链表
     return 0;
 }

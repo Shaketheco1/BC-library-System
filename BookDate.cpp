@@ -2,7 +2,24 @@
 #include<iostream>
 #include<cstring>
 #include<fstream>
+#include<iomanip>
+#include <windows.h>
+
 using namespace std;
+
+#ifdef _WIN32
+#include <windows.h>
+
+int getConsoleHeight()
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+}
+#endif
+
+int getConsoleHeight();
+void pauseScreen();
 
 //缺省构造函数
 BookDate::BookDate():TitleInfo()
@@ -292,7 +309,7 @@ void EditBook(BookDate* book)
 			cin >> str1;
 			temp = book;
 			while (temp != NULL) {
-				if (strncmp(temp->ISBN, str1, strlen(str1) + 1) == 0)
+				if (strncmp(temp->Title, str1, strlen(str1)) == 0)
 				{
 					break;
 				}
@@ -312,7 +329,7 @@ void EditBook(BookDate* book)
 		temp = book;
 		while (temp != NULL)
 		{
-			if (strncmp(temp->Title, str1, strlen(str1) + 1) == 0)
+			if (strcmp(temp->Title, str1) == 0)
 			{
 				break;
 			}
@@ -447,11 +464,20 @@ BookDate* BookDate::Initialize_List()
 void ListBook(BookDate* book)
 {
 	BookDate* temp = book;
+
+	int linecount = 0;
+	int consoleHeight = getConsoleHeight();
 	while (temp != NULL)
 	{
 		temp->BookInfo();
 		temp = temp->next;
+		linecount+=8;
+		if (linecount >= consoleHeight - 1) {
+			pauseScreen();
+			linecount = 0;
+		}
 	}
+
 }
 
 
@@ -460,13 +486,20 @@ void ListBook(BookDate* book)
 void ListWholesale(BookDate* book)
 {
 	BookDate* temp = book;
+	int linecount = 0;
+	int consoleHeight = getConsoleHeight();
 	while (temp != NULL)
 	{
-		cout << "书名：" << temp->Title << "	 ";
-		cout << "批发价：" << temp->Wholesale << "		";
-		cout << "库存量：" << temp->Qty << "		";
+		cout << "书名：" << setw(20) << std::left<< temp->Title ;
+		cout << "批发价：" << setw(20) << std::left << temp->Wholesale;
+		cout << "库存量：" << setw(20) << std::left << temp->Qty;
 		cout << "总批发价：" << temp->Wholesale * temp->Qty << endl;
 		temp = temp->next;
+		linecount++;
+		if (linecount >= consoleHeight - 1) {
+			pauseScreen();
+			linecount = 0;
+		}
 	}
 }
 
@@ -476,13 +509,21 @@ void ListWholesale(BookDate* book)
 void ListRetail(BookDate* book)
 {
 	BookDate* temp = book;
+	int linecount = 0;
+	int consoleHeight = getConsoleHeight();
 	while (temp != NULL)
 	{
-		cout << "书名：" << temp->Title << "	 ";
-		cout << "零售价：" << temp->Retail << "		";
-		cout << "库存量：" << temp->Qty << "		";
-		cout << "总零售价：" << temp->Retail * temp->Qty << endl;
+		cout << "书名：" << setw(20) << std::left<< temp->Title 
+			<< "零售价：" << setw(20) << std::left<< temp->Retail 
+			<< "库存量："<< setw(20) << std::left << temp->Qty 
+			<< "总零售价：" << setw(20) << std::left << temp->Retail * temp->Qty
+			<< endl;
 		temp = temp->next;
+		linecount++;
+		if (linecount >= consoleHeight - 1) {
+			pauseScreen();
+			linecount = 0;
+		}
 	}
 }	
 
@@ -529,10 +570,21 @@ void ListQty(BookDate* book)
 		}
 		end = current; 
 	} while (swapped); 
+
+	int linecount = 0;
+	int consoleHeight = getConsoleHeight();
+	//输出排序后的链表
 	while (book != NULL)
 	{
-		book->BookInfo();
+        cout << "书名：" << setw(20) << left<< book->Title
+             << "库存量：" << setw(20) << left << book->Qty
+             << endl;
 		book = book->next;
+		linecount++;
+		if (linecount >= consoleHeight - 1) {
+			pauseScreen();
+			linecount = 0;
+		}
 	}
 
 }
@@ -557,7 +609,7 @@ void ListTotalWholesale(BookDate* book)
 		BookDate* prev = NULL;
 
 		while (next != end) {
-			if (current->Wholesale>next->Wholesale) { 
+			if (current->Wholesale*current->Qty>next->Wholesale*next->Qty) { 
 				swapped = true;
 				if (prev != NULL) {
 					prev->next = next;
@@ -580,10 +632,24 @@ void ListTotalWholesale(BookDate* book)
 		}
 		end = current;
 	} while (swapped); 
+
+
+	//输出排序后的链表
+	int linecount = 0;
+	int consoleHeight = getConsoleHeight();
 	while (book != NULL)
 	{
-		book->BookInfo();
+		cout << "书名："<< setw(20) << std::left << book->Title 
+			<<"批发价："<< setw(20) << std::left<<book->Wholesale 
+			<<"库存量："<< setw(20) << std::left<<book->Qty 
+			<<"批发价总额：" << book->Wholesale*book->Qty
+			<<endl;
 		book = book->next;
+		linecount++;
+		if (linecount >= consoleHeight - 1) {
+			pauseScreen();
+			linecount = 0;
+		}
 	}
 }
 
@@ -631,11 +697,31 @@ void ListDateAdded(BookDate* book)
 		}
 		end = current;
 	} while (swapped);
+
+
+	//输出排序后的链表
+	int linecount = 0;
+	int consoleHeight = getConsoleHeight();
 	while (book != NULL)
 	{
-		book->BookInfo();
+		cout << "书名：" << setw(20) << std::left<< book->Title 
+			<< "进书日期：" << setw(20) << std::left<< book->DateAdded 
+			<< endl;
 		book = book->next;
+		linecount++;
+		if (linecount >= consoleHeight - 1) {
+			pauseScreen();
+			linecount = 0;
+		}
 	}
+}
+
+
+void pauseScreen()
+{
+	std::cout << "列表满一屏，请按任意键继续...";
+	getchar(); // 等待用户按下任意键
+	std::cout << std::endl;
 }
 
 

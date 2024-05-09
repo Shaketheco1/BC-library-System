@@ -112,16 +112,17 @@ void ShowSale(BookDate* book)
     cout << "           前台销售版面" << endl;
     telltime();
     cout << "数量"
-        << setw(20) << "ISBN号" 
-        << setw(31) << "书名"
-        << setw(33) << "单价" 
+        << setw(19) <<  "ISBN号"
+        << setw(32) << "书名"
+        << setw(32) << "单价" 
         << setw(15) << "金额" 
         << endl;
-    //限定域宽保持整齐；
 
+    //限定域宽保持整齐； 
+    cout .setf(ios::right);
     while (p[i].num != 0) {
         cout << setw(3) << p[i].num 
-            << setw(20) << p[i].ISBN 
+            << setw(20) <<p[i].ISBN 
             << setw(30) << p[i].Title 
             << setw(34) << p[i].Retail 
             << setw(15) << p[i].num * p[i].Retail
@@ -130,7 +131,7 @@ void ShowSale(BookDate* book)
         total += p[i].num * p[i].Retail;
         i++;
     }
-
+    cout.unsetf(ios::right);
     tax = 0.06 * total;
 
     cout << "--------------------------------------------------------------------------------------" << endl;
@@ -144,7 +145,7 @@ void ShowSale(BookDate* book)
 void AddSale(BookDate* book, s* p)
 {
     int i = 0;
-    char choice;
+    char choice='y';
 
     do {
         cout << "请输入ISBN号：";
@@ -157,11 +158,21 @@ void AddSale(BookDate* book, s* p)
         {
             temp = temp->next;
         }
+		temp->BookInfo();
+		char ch;
+		cout << "是否购买？(y/n)：";
+        cin >> ch;
+
+        if (ch == 'y' || ch == 'Y');
+        else {
+            cout << "请重新购买！" << endl;
+            continue;
+        }
 
         if (temp == NULL)
         {
             cout << "没有找到该书" << endl;
-            continue;
+            exit(0);
         }
 
         p[i].ISBN = new char[strlen(temp->getISBN()) + 1];
@@ -169,9 +180,15 @@ void AddSale(BookDate* book, s* p)
         p[i].Title = new char[strlen(temp->getTitle()) + 1];
         strcpy(p[i].Title, temp->getTitle());
         p[i].Retail = temp->getRetail();
-        cout << "请输入数量：";
+        cout << "请输入购买数量：";
         int num;
         cin >> num;
+		if (num > temp->getNumber())
+        {
+			cout << "库存不足" << endl;
+			exit(0);
+		}
+		temp->setQty(temp->getNumber() - num);                   //库存量减少；
         p[i].num = num;
 
         cout << "是否继续购买？" << endl;
@@ -225,6 +242,7 @@ void Cashiermodule(BookDate* book)
 {
     //展示购物单
     ShowSale(book);
+    save_file(book);
     //返回主菜单
     exit(0);
     //Mainmenu(book);
@@ -391,6 +409,8 @@ BookDate* read_file()
 
 void Report_List(BookDate* book)
 {
+    BookDate *temp;
+	temp = book;
     cout << "          xxx图书管理系统" << endl;
     cout << "                     主菜单" << endl;
     cout << "1.书库列表" << endl;
@@ -401,33 +421,33 @@ void Report_List(BookDate* book)
     cout << "6.进书日期列表" << endl;
     cout << "7.返回主菜单" << endl;
     cout << "   输入选择（1~7）：";
-    while (true) {
-        int choice;
-        cin >> choice;
-        switch (choice)
-        {
-        case 1:
-            ListBook(book);
+    int choice;
+    cin >> choice;
+    cin.ignore();
+    switch (choice)
+    {
+     case 1:
+           ListBook(book);
             break;                                  //书库列表
-        case 2:
+     case 2:
             ListWholesale(book);
             break;                                      //批发价列表
-        case 3:
+     case 3:
             ListRetail(book);
             break;                                  //零售价列表
-        case 4:
+     case 4:
             ListQty(book);
             break;                              //书的数量列表
-        case 5:
+     case 5:
             ListTotalWholesale(book);
             break;                                      //书的价值额列表
-        case 6:
+     case 6:
             ListDateAdded(book);
             break;                                  //进书日期列表
-        case 7:
+     case 7:
             Mainmenu(book);                     //主菜单
-        }
-    }
+     }
+    exit(0);
 }
 
                
